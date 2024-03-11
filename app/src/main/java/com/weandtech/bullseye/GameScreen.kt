@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -27,14 +28,24 @@ import com.weandtech.bullseye.R
 import com.weandtech.bullseye.ResultDialog
 import com.weandtech.bullseye.TargetSlider
 import com.weandtech.bullseye.ui.theme.BullseyeTheme
+import kotlin.math.abs
+import kotlin.random.Random
 
 @Composable
 fun GameScreen() {
 
     var alertIsVisible by rememberSaveable { mutableStateOf(false) }
     var sliderValue by rememberSaveable { mutableFloatStateOf(0.05f) }
+    var targetValue by rememberSaveable { mutableIntStateOf(Random.nextInt(1, 100)) }
 
     val sliderToInt = (sliderValue * 100).toInt()
+
+
+    fun pointsForCurrentRound(): Int {
+        val maxScore = 100
+        val difference = abs(targetValue - sliderToInt)
+        return maxScore - difference
+    }
 
 
     Column(
@@ -50,7 +61,7 @@ fun GameScreen() {
             verticalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier.weight(9f)
         ) {
-            GamePrompt()
+            GamePrompt(targetValue = targetValue)
             TargetSlider(
                 value = sliderValue,
                 valueChanged = { value ->
@@ -69,7 +80,8 @@ fun GameScreen() {
         if (alertIsVisible) {
             ResultDialog(
                 hideDialog = { alertIsVisible = false },
-                sliderValue = sliderToInt
+                sliderValue = sliderToInt,
+                points = pointsForCurrentRound()
             )
         }
 
